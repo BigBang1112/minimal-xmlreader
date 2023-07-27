@@ -2,12 +2,12 @@
 
 namespace MinimalXmlReader;
 
-public sealed class MiniXmlReader
+public ref struct MiniXmlReader
 {
-    private readonly string xml;
+    private readonly ReadOnlySpan<char> xml;
     private int position;
 
-    public MiniXmlReader(string xml)
+    public MiniXmlReader(ReadOnlySpan<char> xml)
     {
         this.xml = xml;
     }
@@ -65,7 +65,7 @@ public sealed class MiniXmlReader
         while (true);
     }
 
-    public bool SkipStartElement(string name)
+    public bool SkipStartElement(ReadOnlySpan<char> name)
     {
         SkipSpaces();
 
@@ -98,7 +98,7 @@ public sealed class MiniXmlReader
         // No attributes expected yet
     }
 
-    public string ReadStartElement()
+    public ReadOnlySpan<char> ReadStartElement()
     {
         SkipSpaces();
 
@@ -117,7 +117,7 @@ public sealed class MiniXmlReader
         return name;
     }
 
-    public void SkipEndElement(string name)
+    public void SkipEndElement(ReadOnlySpan<char> name)
     {
         SkipSpaces();
 
@@ -150,7 +150,7 @@ public sealed class MiniXmlReader
         position++;
     }
 
-    public string ReadContent()
+    public ReadOnlySpan<char> ReadContent()
     {
         SkipSpaces();
 
