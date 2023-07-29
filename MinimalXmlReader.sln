@@ -5,9 +5,23 @@ VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinimalXmlReader", "MinimalXmlReader\MinimalXmlReader.csproj", "{322F1703-1415-4BFE-AE29-49E28ADA882B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinimalXmlReader.Tests", "MinimalXmlReader.Tests\MinimalXmlReader.Tests.csproj", "{FB4C519B-E97B-44AC-946F-20F308F03233}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinimalXmlReader.Tests", "MinimalXmlReader.Tests\MinimalXmlReader.Tests.csproj", "{FB4C519B-E97B-44AC-946F-20F308F03233}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MinimalXmlReader.Benchmarks", "MinimalXmlReader.Benchmarks\MinimalXmlReader.Benchmarks.csproj", "{477D874B-0516-45D3-BD55-11CE8B525B3A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MinimalXmlReader.Benchmarks", "MinimalXmlReader.Benchmarks\MinimalXmlReader.Benchmarks.csproj", "{477D874B-0516-45D3-BD55-11CE8B525B3A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{7F2CFB34-A8CC-4B54-A7E4-C31E59374C34}"
+	ProjectSection(SolutionItems) = preProject
+		Examples\Random.xml = Examples\Random.xml
+		Examples\XmlRpcMethodCall.xml = Examples\XmlRpcMethodCall.xml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Položky řešení", "Položky řešení", "{BCCFF6F1-9AE2-4142-B49D-449ED93D590F}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		LICENSE.txt = LICENSE.txt
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

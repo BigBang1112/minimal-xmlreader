@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<methodCall>
+<methodName>TrackMania.PlayerChat</methodName>
+<params>
+<param><value><i4>0</i4></value></param>
+<param><value><string>bigbang1112_dev</string></value></param>
+<param><value><string>TrackMania.PlayerFinish 237 bigbang1112 0</string></value></param>
+<param><value><boolean>0</boolean></value></param>
+</params>
+</methodCall>

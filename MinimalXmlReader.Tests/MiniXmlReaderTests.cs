@@ -1,47 +1,117 @@
-﻿namespace MinimalXmlReader.Tests;
+﻿using System.Globalization;
+
+namespace MinimalXmlReader.Tests;
 
 public class MiniXmlReaderTests
 {
     [Fact]
-    public void Test()
+    public void IntegrationTest_XmlRpcMethodCall()
     {
-        var xml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
-<methodCall>
-<methodName>TrackMania.PlayerChat</methodName>
-<params>
-<param><value><i4>0</i4></value></param>
-<param><value><string>bigbang1112_dev</string></value></param>
-<param><value><string>TrackMania.PlayerFinish 237 bigbang1112 0</string></value></param>
-<param><value><boolean>0</boolean></value></param>
-</params>
-</methodCall>";
+        var xml = File.ReadAllText("XmlRpcMethodCall.xml");
 
-        var reader = new MiniXmlReader(xml);
+        var r = new MiniXmlReader(xml);
 
-        reader.SkipProcessingInstruction();
-        reader.SkipStartElement("methodCall");
-        reader.SkipStartElement("methodName");
-        var methodName = reader.ReadContent();
-        reader.SkipEndElement();
-        reader.SkipStartElement("params");
+        Assert.True(r.SkipProcessingInstruction());
+        Assert.True(r.SkipStartElement("methodCall"));
+        Assert.True(r.SkipStartElement("methodName"));
+        Assert.Equal(expected: "TrackMania.PlayerChat", actual: r.ReadContent().ToString());
+        Assert.True(r.SkipEndElement("methodName"));
+        Assert.True(r.SkipStartElement("params"));
 
-        while (reader.SkipStartElement("param"))
+        var expectedParams = new object[]
         {
-            reader.SkipStartElement("value");
+            0,
+            "bigbang1112_dev",
+            "TrackMania.PlayerFinish 237 bigbang1112 0",
+            false
+        };
 
-            switch (reader.ReadStartElement())
+        var actualParams = new List<object>();
+
+        while (r.SkipStartElement("param"))
+        {
+            Assert.True(r.SkipStartElement("value"));
+
+            var typeName = r.ReadStartElement();
+
+            switch (typeName)
             {
                 case "i4":
-                    var i4 = reader.ReadContent();
+                    actualParams.Add(int.Parse(r.ReadContent()));
+                    break;
+                case "string":
+                    actualParams.Add(r.ReadContent().ToString());
+                    break;
+                case "boolean":
+                    actualParams.Add(r.ReadContent().ToString() != "0");
                     break;
                 default:
-                    var bla = reader.ReadContent();
-                    break;
+                    throw new Exception("Invalid type");
             }
 
-            reader.SkipEndElement();
-            reader.SkipEndElement();
-            reader.SkipEndElement();
+            Assert.True(r.SkipEndElement(typeName));
+            Assert.True(r.SkipEndElement("value"));
+            Assert.True(r.SkipEndElement("param"));
         }
+
+        Assert.Equal(expectedParams, actualParams);
+
+        Assert.True(r.SkipEndElement("params"));
+        Assert.True(r.SkipEndElement("methodCall"));
+    }
+
+    [Fact]
+    public void IntegrationTest_Random()
+    {
+        var xml = File.ReadAllText("Random.xml");
+
+        var r = new MiniXmlReader(xml);
+
+        Assert.False(r.SkipProcessingInstruction());
+        Assert.True(r.SkipStartElement("root"));
+        Assert.True(r.ReadStartElement("person", out var personAtts));
+        Assert.Equal(expected: "Tierney", actual: personAtts["firstname"]);
+        Assert.Equal(expected: "Shirberg", actual: personAtts["lastname"]);
+        Assert.Equal(expected: "Port-au-Prince", actual: personAtts["city"]);
+        Assert.Equal(expected: "Sao Tome and Principe", actual: personAtts["country"]);
+        Assert.Equal(expected: "Anallese", actual: personAtts["firstname2"]);
+        Assert.Equal(expected: "Chick", actual: personAtts["lastname2"]);
+        Assert.Equal(expected: "Anallese.Chick@yopmail.com", actual: personAtts["email"]);
+        Assert.True(r.SkipStartElement("random"));
+        Assert.Equal(expected: 58, actual: int.Parse(r.ReadContent()));
+        Assert.True(r.SkipEndElement("random"));
+        Assert.True(r.SkipStartElement("random_float"));
+        Assert.Equal(expected: 9.873, actual: double.Parse(r.ReadContent(), NumberStyles.Number, CultureInfo.InvariantCulture));
+        Assert.True(r.SkipEndElement("random_float"));
+        Assert.True(r.SkipStartElement("bool"));
+        Assert.True(bool.Parse(r.ReadContent()));
+        Assert.True(r.SkipEndElement("bool"));
+        Assert.True(r.SkipStartElement("date"));
+        Assert.Equal(expected: "1990-09-10", actual: r.ReadContent().ToString());
+        Assert.True(r.SkipEndElement("date"));
+        Assert.True(r.SkipStartElement("regEx"));
+        Assert.Equal(expected: "helloooooooooooooooooooooooooooooo to you", actual: r.ReadContent().ToString());
+        Assert.True(r.SkipEndElement("regEx"));
+        Assert.True(r.SkipStartElement("enum"));
+        Assert.Equal(expected: "xml", actual: r.ReadContent().ToString());
+        Assert.True(r.SkipEndElement("enum"));
+
+        var expectedListElt = new[] { "Lilith", "Correy", "Roslyn", "Magdalena", "Ninnetta" };
+
+        var actualListElt = new List<string>();
+
+        while (r.SkipStartElement("elt"))
+        {
+            actualListElt.Add(r.ReadContent().ToString());
+            Assert.True(r.SkipEndElement("elt"));
+        }
+
+        Assert.Equal(expectedListElt, actualListElt);
+
+        Assert.True(r.SkipStartElement("Anallese"));
+        Assert.True(r.SkipStartElement("age"));
+        Assert.Equal(expected: 34, actual: int.Parse(r.ReadContent()));
+        Assert.True(r.SkipEndElement("age"));
+        Assert.True(r.SkipEndElement("Anallese"));
     }
 }

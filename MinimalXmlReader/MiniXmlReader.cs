@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace MinimalXmlReader;
 
@@ -12,40 +13,224 @@ public ref struct MiniXmlReader
         this.xml = xml;
     }
 
-    public void SkipProcessingInstruction()
+    public bool SkipProcessingInstruction()
+    {
+        _ = SkipSpaces();
+
+        var safePosition = position;
+
+        if (!SkipChar('<'))
+        {
+            return false;
+        }
+
+        if (!SkipChar('?'))
+        {
+            position = safePosition;
+            return false;
+        }
+
+        SkipAttributes();
+
+        return true;
+    }
+
+    private bool ValidateElementName(ReadOnlySpan<char> name)
+    {
+        for (var i = 0; i < name.Length; i++)
+        {
+            var ch = xml[position];
+
+            if (ch != name[i])
+            {
+                return false;
+            }
+
+            Advance();
+        }
+
+        var c = xml[position];
+
+        if (!CharIsSpace(c) && c != '/' && c != '>')
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    public bool SkipStartElement(ReadOnlySpan<char> name)
+    {
+        _ = SkipSpaces();
+
+        var safePosition = position;
+
+        if (!SkipChar('<'))
+        {
+            throw new Exception("Not a start element");
+        }
+
+        if (!ValidateElementName(name))
+        {
+            position = safePosition;
+            return false;
+        }
+
+        SkipAttributes();
+
+        return true;
+    }
+
+    public bool SkipStartElement()
     {
         SkipSpaces();
 
-        _ = SkipChar('<');
-        _ = SkipChar('?');
-        SkipUntilChar(' ');
-
-        do
+        if (!SkipChar('<'))
         {
-            while (xml[position] != '?') position++;
-            position++;
+            throw new Exception("Not a start element");
         }
-        while (!SkipChar('>'));
+
+        while (true)
+        {
+            var c = xml[position];
+
+            if (CharIsSpace(c) || c == '/' || c == '>')
+            {
+                break;
+            }
+
+            Advance();
+        }
+
+        SkipAttributes();
+
+        return true;
+    }
+
+    public ReadOnlySpan<char> ReadStartElement(out Dictionary<string, string> attributes)
+    {
+        var name = BeginReadStartElement();
+
+        attributes = ReadAttributes();
+
+        return name;
+    }
+
+    private Dictionary<string, string> ReadAttributes()
+    {
+        SkipSpaces();
+
+        var attributes = new Dictionary<string, string>();
+
+        while (!SkipEnd(out var _))
+        {
+            var attName = ReadUntilChar('=');
+
+            Advance();
+
+            if (!SkipChar('"'))
+            {
+                throw new Exception("Expected \"");
+            }
+
+            var attValue = ReadUntilChar('"', includeSpaces: true);
+
+            Advance();
+
+            attributes.Add(attName.ToString(), attValue.ToString());
+
+            SkipSpaces();
+        }
+
+        return attributes;
+    }
+
+    public ReadOnlySpan<char> ReadStartElement()
+    {
+        var name = BeginReadStartElement();
+
+        SkipAttributes();
+
+        return name;
+    }
+
+    public bool ReadStartElement(ReadOnlySpan<char> name, [NotNullWhen(true)] out Dictionary<string, string>? attributes)
+    {
+        SkipSpaces();
+
+        var safePosition = position;
+
+        if (!SkipChar('<'))
+        {
+            throw new Exception("Not a start element");
+        }
+
+        if (!ValidateElementName(name))
+        {
+            position = safePosition;
+            attributes = null;
+            return false;
+        }
+
+        attributes = ReadAttributes();
+
+        return true;
+    }
+
+    private ReadOnlySpan<char> BeginReadStartElement()
+    {
+        SkipSpaces();
+
+        if (!SkipChar('<'))
+        {
+            throw new Exception("Not a start element");
+        }
+
+        var start = position;
+
+        while (true)
+        {
+            var c = xml[position];
+
+            if (CharIsSpace(c) || c == '/' || c == '>')
+            {
+                break;
+            }
+
+            Advance();
+        }
+
+        var name = xml[start..position];
+
+        Debug.WriteLine($"BeginReadStartElement({name})");
+        return name;
     }
 
     private bool SkipChar(char c)
     {
-        var skipped = true;
-
         Debug.WriteLine($"SkipChar({c}) actual: {xml[position]}");
 
-        if (xml[position] != c) skipped = false;
-        position++;
-        return skipped;
+        if (xml[position] != c)
+        {
+            return false;
+        }
+
+        AdvanceSafe();
+        return true;
     }
 
-    private void SkipUntilChar(char c)
+    private void SkipUntilChar(char c, bool includeSpaces = false)
     {
         do
         {
             var ch = xml[position];
             if (ch == c) return;
-            if (ch == '\r' || ch == '\n') throw new Exception();
+
+            if (!includeSpaces && CharIsSpace(c))
+            {
+                throw new Exception("Unexpected space");
+            }
+
             position++;
         }
         while (true);
@@ -55,99 +240,145 @@ public ref struct MiniXmlReader
     {
         var skipped = false;
 
-        do
+        while (CharIsSpace(xml[position]))
         {
-            var c = xml[position];
-            if (c != ' ' && c != '\t' && c != '\r' && c != '\n') return skipped;
             position++;
             skipped = true;
         }
-        while (true);
+
+        return skipped;
     }
 
-    public bool SkipStartElement(ReadOnlySpan<char> name)
+    private void SkipAttributes()
     {
         SkipSpaces();
+
+        while (!SkipEnd(out var _))
+        {
+            SkipUntilChar('=');
+
+            Advance();
+
+            if (!SkipChar('"'))
+            {
+                throw new Exception("Expected \"");
+            }
+
+            SkipUntilChar('"', includeSpaces: true);
+
+            Advance();
+
+            SkipSpaces();
+        }
+    }
+
+    private ReadOnlySpan<char> ReadUntilChar(char expectedChar, bool includeSpaces = false)
+    {
+        var start = position;
+
+        while (true)
+        {
+            var c = xml[position];
+
+            if (c == expectedChar)
+            {
+                break;
+            }
+
+            if (!includeSpaces && CharIsSpace(c))
+            {
+                throw new Exception("Unexpected space");
+            }
+
+            Advance();
+        }
+
+        return xml[start..position];
+    }
+
+    private void Advance()
+    {
+        if (position == xml.Length - 1)
+        {
+            throw new Exception("Unexpected end of XML");
+        }
+
+        position++;
+    }
+
+    private bool AdvanceSafe()
+    {
+        if (position == xml.Length - 1)
+        {
+            return false;
+        }
+
+        position++;
+        return true;
+    }
+
+    private bool SkipEnd(out EndType endType)
+    {
+        if (SkipChar('/'))
+        {
+            endType = EndType.SelfClosed;
+        }
+        else if (SkipChar('?'))
+        {
+            endType = EndType.ProcessingInstruction;
+        }
+        else
+        {
+            endType = EndType.None;
+        }
+
+        return SkipChar('>');
+    }
+
+    private static bool CharIsSpace(char c) => c is ' ' or '\t' or '\r' or '\n';
+
+    public bool SkipEndElement(ReadOnlySpan<char> name)
+    {
+        _ = SkipSpaces();
 
         var safePosition = position;
 
-        _ = SkipChar('<');
-
-        for (var i = 0; i < name.Length; i++)
+        if (!SkipChar('<') || !SkipChar('/'))
         {
-            var ch = xml[position];
-
-            if (ch != name[i])
-            {
-                position = safePosition;
-                return false;
-            }
-
-            position++;
+            position = safePosition;
+            return false;
         }
 
-        SkipSpaces();
-
-        if (SkipChar('>'))
+        if (!ValidateElementName(name))
         {
-            return true;
+            position = safePosition;
+            return false;
         }
 
-        throw new Exception();
-
-        // No attributes expected yet
-    }
-
-    public ReadOnlySpan<char> ReadStartElement()
-    {
-        SkipSpaces();
-
-        _ = SkipChar('<');
-
-        var start = position;
-
-        while (xml[position] != ' ' && xml[position] != '>') position++;
-
-        var name = xml[start..position];
-
-        SkipSpaces();
-
-        position++;
-
-        return name;
-    }
-
-    public void SkipEndElement(ReadOnlySpan<char> name)
-    {
-        SkipSpaces();
-
-        _ = SkipChar('<');
-        _ = SkipChar('/');
-
-        for (var i = 0; i < name.Length; i++)
-        {
-            var ch = xml[position];
-            if (ch != name[i]) throw new Exception();
-            position++;
-        }
-
-        SkipSpaces();
+        _ = SkipSpaces();
 
         if (!SkipChar('>'))
         {
-            throw new Exception();
+            throw new Exception("No closing char");
         }
+
+        return true;
     }
 
-    public void SkipEndElement()
+    public bool SkipEndElement()
     {
-        SkipSpaces();
+        _ = SkipSpaces();
 
-        _ = SkipChar('<');
-        _ = SkipChar('/');
-        SkipUntilChar('>');
+        if (!SkipChar('<') || !SkipChar('/'))
+        {
+            return false;
+        }
 
-        position++;
+        SkipUntilChar('>', includeSpaces: true);
+
+        AdvanceSafe();
+
+        return true;
     }
 
     public ReadOnlySpan<char> ReadContent()
@@ -156,7 +387,7 @@ public ref struct MiniXmlReader
 
         var start = position;
 
-        while (xml[position] != '<') position++;
+        while (xml[position] != '<') Advance();
 
         return xml[start..position];
     }

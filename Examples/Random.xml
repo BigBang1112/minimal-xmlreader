@@ -1,0 +1,25 @@
+﻿<root>
+	<person
+	firstname="Tierney"
+	lastname="Shirberg"
+	city="Port-au-Prince"
+	country="Sao Tome and Principe"
+	firstname2="Anallese"
+	lastname2="Chick"
+	email="Anallese.Chick@yopmail.com"
+  />
+	<random>58</random>
+	<random_float>9.873</random_float>
+	<bool>true</bool>
+	<date>1990-09-10</date>
+	<regEx>helloooooooooooooooooooooooooooooo to you</regEx>
+	<enum>xml</enum>
+	<elt>Lilith</elt>
+	<elt>Correy</elt>
+	<elt>Roslyn</elt>
+	<elt>Magdalena</elt>
+	<elt>Ninnetta</elt>
+	<Anallese>
+		<age>34</age>
+	</Anallese>
+</root>
