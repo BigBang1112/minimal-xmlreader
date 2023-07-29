@@ -196,6 +196,11 @@ public ref struct MiniXmlReader
         return xml[start..position];
     }
 
+    public string ReadContentAsString()
+    {
+        return ReadContent().ToString();
+    }
+
     public bool ReadContentAsBoolean()
     {
         var content = ReadContent();
