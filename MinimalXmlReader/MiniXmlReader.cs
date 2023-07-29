@@ -35,30 +35,6 @@ public ref struct MiniXmlReader
         return true;
     }
 
-    private bool ValidateElementName(ReadOnlySpan<char> name)
-    {
-        for (var i = 0; i < name.Length; i++)
-        {
-            var ch = xml[position];
-
-            if (ch != name[i])
-            {
-                return false;
-            }
-
-            Advance();
-        }
-
-        var c = xml[position];
-
-        if (!CharIsSpace(c) && c != '/' && c != '>')
-        {
-            return false;
-        }
-
-        return true;
-    }
-
     public bool SkipStartElement(ReadOnlySpan<char> name)
     {
         _ = SkipSpaces();
@@ -116,35 +92,6 @@ public ref struct MiniXmlReader
         return name;
     }
 
-    private Dictionary<string, string> ReadAttributes(bool expectsProcessingInstruction = false)
-    {
-        SkipSpaces();
-
-        var attributes = new Dictionary<string, string>();
-
-        while (!SkipEnd(expectsProcessingInstruction, out var _))
-        {
-            var attName = ReadUntilChar('=');
-
-            Advance();
-
-            if (!SkipChar('"'))
-            {
-                throw new Exception("Expected \"");
-            }
-
-            var attValue = ReadUntilChar('"', includeSpaces: true);
-
-            Advance();
-
-            attributes.Add(attName.ToString(), attValue.ToString());
-
-            SkipSpaces();
-        }
-
-        return attributes;
-    }
-
     public ReadOnlySpan<char> ReadStartElement()
     {
         var name = BeginReadStartElement();
@@ -175,6 +122,143 @@ public ref struct MiniXmlReader
         attributes = ReadAttributes();
 
         return true;
+    }
+
+    public bool SkipEndElement(ReadOnlySpan<char> name)
+    {
+        _ = SkipSpaces();
+
+        var safePosition = position;
+
+        if (!SkipChar('<') || !SkipChar('/') || !ValidateElementName(name))
+        {
+            position = safePosition;
+            return false;
+        }
+
+        _ = SkipSpaces();
+
+        if (!SkipChar('>'))
+        {
+            throw new Exception("No closing char");
+        }
+
+        return true;
+    }
+
+    public bool SkipEndElement()
+    {
+        _ = SkipSpaces();
+
+        if (!SkipChar('<') || !SkipChar('/'))
+        {
+            return false;
+        }
+
+        while (true)
+        {
+            var c = xml[position];
+
+            if (c == '>')
+            {
+                AdvanceSafe();
+                return true;
+            }
+
+            if (CharIsSpace(c))
+            {
+                break;
+            }
+
+            Advance();
+        }
+
+        _ = SkipSpaces();
+
+        if (!SkipChar('>'))
+        {
+            throw new Exception("No closing char");
+        }
+
+        AdvanceSafe();
+
+        return true;
+    }
+
+    public ReadOnlySpan<char> ReadContent()
+    {
+        SkipSpaces();
+
+        var start = position;
+
+        while (xml[position] != '<') Advance();
+
+        return xml[start..position];
+    }
+
+    public bool ReadContentAsBoolean()
+    {
+        var content = ReadContent();
+
+        return content switch
+        {
+            "0" => false,
+            "1" => true,
+            _ => bool.Parse(content),
+        };
+    }
+
+    private bool ValidateElementName(ReadOnlySpan<char> name)
+    {
+        for (var i = 0; i < name.Length; i++)
+        {
+            var ch = xml[position];
+
+            if (ch != name[i])
+            {
+                return false;
+            }
+
+            Advance();
+        }
+
+        var c = xml[position];
+
+        if (!CharIsSpace(c) && c != '/' && c != '>')
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private Dictionary<string, string> ReadAttributes(bool expectsProcessingInstruction = false)
+    {
+        SkipSpaces();
+
+        var attributes = new Dictionary<string, string>();
+
+        while (!SkipEnd(expectsProcessingInstruction, out var _))
+        {
+            var attName = ReadUntilChar('=');
+
+            Advance();
+
+            if (!SkipChar('"'))
+            {
+                throw new Exception("Expected \"");
+            }
+
+            var attValue = ReadUntilChar('"', includeSpaces: true);
+
+            Advance();
+
+            attributes.Add(attName.ToString(), attValue.ToString());
+
+            SkipSpaces();
+        }
+
+        return attributes;
     }
 
     private ReadOnlySpan<char> BeginReadStartElement()
@@ -336,88 +420,4 @@ public ref struct MiniXmlReader
     }
 
     private static bool CharIsSpace(char c) => c is ' ' or '\t' or '\r' or '\n';
-
-    public bool SkipEndElement(ReadOnlySpan<char> name)
-    {
-        _ = SkipSpaces();
-
-        var safePosition = position;
-
-        if (!SkipChar('<') || !SkipChar('/') || !ValidateElementName(name))
-        {
-            position = safePosition;
-            return false;
-        }
-
-        _ = SkipSpaces();
-
-        if (!SkipChar('>'))
-        {
-            throw new Exception("No closing char");
-        }
-
-        return true;
-    }
-
-    public bool SkipEndElement()
-    {
-        _ = SkipSpaces();
-
-        if (!SkipChar('<') || !SkipChar('/'))
-        {
-            return false;
-        }
-
-        while (true)
-        {
-            var c = xml[position];
-
-            if (c == '>')
-            {
-                AdvanceSafe();
-                return true;
-            }
-
-            if (CharIsSpace(c))
-            {
-                break;
-            }
-
-            Advance();
-        }
-
-        _ = SkipSpaces();
-
-        if (!SkipChar('>'))
-        {
-            throw new Exception("No closing char");
-        }
-
-        AdvanceSafe();
-
-        return true;
-    }
-
-    public ReadOnlySpan<char> ReadContent()
-    {
-        SkipSpaces();
-
-        var start = position;
-
-        while (xml[position] != '<') Advance();
-
-        return xml[start..position];
-    }
-
-    public bool ReadContentAsBoolean()
-    {
-        var content = ReadContent();
-
-        return content switch
-        {
-            "0" => false,
-            "1" => true,
-            _ => bool.Parse(content),
-        };
-    }
 }
