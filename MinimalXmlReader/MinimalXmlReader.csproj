@@ -6,12 +6,13 @@
 		<AssemblyTitle>MinimalXmlReader</AssemblyTitle>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Authors>Petr Pivoňka (BigBang1112)</Authors>
-		<Description>Simple, lightweight, and fast XML reader for .NET, mainly viable for NativeAOT.</Description>
+		<Description>Simple, lightweight, and fast XML reader for .NET, mainly viable for NativeAOT, and for those that don't want to waste 6MB of executable binary just to read a few XML lines.</Description>
 		<Copyright>Copyright © Petr Pivoňka</Copyright>
 		<PackageTags>xml, xmlreader, performance, reader, nativeaot</PackageTags>
 		<RepositoryType>git</RepositoryType>
 		<RepositoryUrl>https://github.com/BigBang1112/minimal-xmlreader</RepositoryUrl>
 		<PackageProjectUrl>https://github.com/BigBang1112/minimal-xmlreader</PackageProjectUrl>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -29,7 +30,6 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 		<NoWarn>1591</NoWarn>
