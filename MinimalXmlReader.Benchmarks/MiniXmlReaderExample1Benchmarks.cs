@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
+using System.Text;
 using System.Xml;
 
 namespace MinimalXmlReader.Benchmarks;
@@ -11,10 +12,15 @@ namespace MinimalXmlReader.Benchmarks;
 public class MiniXmlReaderExample1Benchmarks
 {
     private readonly string xml;
+    private readonly MemoryStream ms;
+    private readonly XmlReader xmlReader;
 
     public MiniXmlReaderExample1Benchmarks()
     {
         xml = File.ReadAllText("XmlRpcMethodCall.xml");
+
+        ms = new MemoryStream(Encoding.UTF8.GetBytes(xml));
+        xmlReader = XmlReader.Create(ms, new() { IgnoreWhitespace = true });
     }
 
     [Benchmark]
@@ -35,25 +41,32 @@ public class MiniXmlReaderExample1Benchmarks
 
             switch (r.ReadStartElement())
             {
-                default:
-                    r.ReadContent();
+                case "i4":
+                    int.Parse(r.ReadContent());
                     break;
+                case "string":
+                    r.ReadContent().ToString();
+                    break;
+                case "boolean":
+                    r.ReadContentAsBoolean();
+                    break;
+                default:
+                    throw new Exception("Invalid type");
             }
 
             r.SkipEndElement();
-            r.SkipEndElement();
-            r.SkipEndElement();
+            r.SkipEndElement("value");
+            r.SkipEndElement("param");
         }
 
         return methodName.ToString();
     }
 
-
     [Benchmark]
     public string MicrosoftXmlReader()
     {
-        using var strReader = new StringReader(xml);
-        using var r = XmlReader.Create(strReader);
+        using var strR = new StringReader(xml);
+        using var r = XmlReader.Create(strR, new() { IgnoreWhitespace = true });
 
         r.MoveToContent();
         r.ReadStartElement("methodCall");
@@ -70,9 +83,22 @@ public class MiniXmlReaderExample1Benchmarks
             }
 
             r.ReadStartElement("value");
-            r.ReadStartElement();
-            var stuff = r.ReadContentAsString();
-            r.ReadEndElement();
+
+            switch (r.Name)
+            {
+                case "i4":
+                    r.ReadElementContentAsInt();
+                    break;
+                case "string":
+                    r.ReadElementContentAsString();
+                    break;
+                case "boolean":
+                    r.ReadElementContentAsBoolean();
+                    break;
+                default:
+                    throw new Exception("Invalid type");
+            }
+
             r.ReadEndElement();
             r.ReadEndElement();
         }

@@ -1,4 +1,5 @@
 ﻿using System.Globalization;
+using System.Xml;
 
 namespace MinimalXmlReader.Tests;
 
@@ -43,7 +44,7 @@ public class MiniXmlReaderTests
                     actualParams.Add(r.ReadContent().ToString());
                     break;
                 case "boolean":
-                    actualParams.Add(r.ReadContent().ToString() != "0");
+                    actualParams.Add(r.ReadContentAsBoolean());
                     break;
                 default:
                     throw new Exception("Invalid type");
@@ -84,7 +85,7 @@ public class MiniXmlReaderTests
         Assert.Equal(expected: 9.873, actual: double.Parse(r.ReadContent(), NumberStyles.Number, CultureInfo.InvariantCulture));
         Assert.True(r.SkipEndElement("random_float"));
         Assert.True(r.SkipStartElement("bool"));
-        Assert.True(bool.Parse(r.ReadContent()));
+        Assert.True(r.ReadContentAsBoolean());
         Assert.True(r.SkipEndElement("bool"));
         Assert.True(r.SkipStartElement("date"));
         Assert.Equal(expected: "1990-09-10", actual: r.ReadContent().ToString());

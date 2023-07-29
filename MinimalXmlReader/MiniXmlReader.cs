@@ -30,7 +30,7 @@ public ref struct MiniXmlReader
             return false;
         }
 
-        SkipAttributes();
+        SkipAttributes(expectsProcessingInstruction: true);
 
         return true;
     }
@@ -116,13 +116,13 @@ public ref struct MiniXmlReader
         return name;
     }
 
-    private Dictionary<string, string> ReadAttributes()
+    private Dictionary<string, string> ReadAttributes(bool expectsProcessingInstruction = false)
     {
         SkipSpaces();
 
         var attributes = new Dictionary<string, string>();
 
-        while (!SkipEnd(out var _))
+        while (!SkipEnd(expectsProcessingInstruction, out var _))
         {
             var attName = ReadUntilChar('=');
 
@@ -249,11 +249,11 @@ public ref struct MiniXmlReader
         return skipped;
     }
 
-    private void SkipAttributes()
+    private void SkipAttributes(bool expectsProcessingInstruction = false)
     {
         SkipSpaces();
 
-        while (!SkipEnd(out var _))
+        while (!SkipEnd(expectsProcessingInstruction, out var _))
         {
             SkipUntilChar('=');
 
@@ -317,13 +317,13 @@ public ref struct MiniXmlReader
         return true;
     }
 
-    private bool SkipEnd(out EndType endType)
+    private bool SkipEnd(bool expectsProcessingInstruction, out EndType endType)
     {
-        if (SkipChar('/'))
+        if (!expectsProcessingInstruction && SkipChar('/'))
         {
             endType = EndType.SelfClosed;
         }
-        else if (SkipChar('?'))
+        else if (expectsProcessingInstruction && SkipChar('?'))
         {
             endType = EndType.ProcessingInstruction;
         }
@@ -343,13 +343,7 @@ public ref struct MiniXmlReader
 
         var safePosition = position;
 
-        if (!SkipChar('<') || !SkipChar('/'))
-        {
-            position = safePosition;
-            return false;
-        }
-
-        if (!ValidateElementName(name))
+        if (!SkipChar('<') || !SkipChar('/') || !ValidateElementName(name))
         {
             position = safePosition;
             return false;
@@ -374,7 +368,30 @@ public ref struct MiniXmlReader
             return false;
         }
 
-        SkipUntilChar('>', includeSpaces: true);
+        while (true)
+        {
+            var c = xml[position];
+
+            if (c == '>')
+            {
+                AdvanceSafe();
+                return true;
+            }
+
+            if (CharIsSpace(c))
+            {
+                break;
+            }
+
+            Advance();
+        }
+
+        _ = SkipSpaces();
+
+        if (!SkipChar('>'))
+        {
+            throw new Exception("No closing char");
+        }
 
         AdvanceSafe();
 
@@ -390,5 +407,17 @@ public ref struct MiniXmlReader
         while (xml[position] != '<') Advance();
 
         return xml[start..position];
+    }
+
+    public bool ReadContentAsBoolean()
+    {
+        var content = ReadContent();
+
+        return content switch
+        {
+            "0" => false,
+            "1" => true,
+            _ => bool.Parse(content),
+        };
     }
 }
