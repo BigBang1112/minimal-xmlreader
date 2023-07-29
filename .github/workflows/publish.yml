@@ -1,0 +1,45 @@
+name: Publish
+
+on:
+  release:
+    types: [ published ]
+
+permissions:
+  contents: write # important for release description edit and asset upload
+
+jobs:
+  build:
+    name: Build
+
+    runs-on: ubuntu-latest
+    
+    env:
+      GH_TOKEN: ${{ github.token }}
+
+    steps:
+    - uses: actions/checkout@v2
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: |
+          7.0.x
+          6.0.x
+          
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build -c Release --no-restore
+      
+    - name: Test
+      run: dotnet test -c Release --no-build --verbosity normal
+    
+    - name: Upload the package to this release
+      run: gh release upload ${{ github.ref_name }} MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg
+      
+    - name: Publish the package to nuget.org
+      run: dotnet nuget push MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+    
+    - name: Publish the package to github.com
+      run: dotnet nuget push MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/bigbang1112/index.json
