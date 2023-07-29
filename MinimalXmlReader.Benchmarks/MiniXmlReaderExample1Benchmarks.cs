@@ -20,10 +20,10 @@ public class MiniXmlReaderExample1Benchmarks
         xml = File.ReadAllText("XmlRpcMethodCall.xml");
 
         ms = new MemoryStream(Encoding.UTF8.GetBytes(xml));
-        xmlReader = XmlReader.Create(ms, new() { IgnoreWhitespace = true });
+        xmlReader = System.Xml.XmlReader.Create(ms, new() { IgnoreWhitespace = true });
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = true)]
     public string MiniXmlReader()
     {
         var r = new MiniXmlReader(xml);
@@ -63,10 +63,10 @@ public class MiniXmlReaderExample1Benchmarks
     }
 
     [Benchmark]
-    public string MicrosoftXmlReader()
+    public string XmlReader()
     {
         using var strR = new StringReader(xml);
-        using var r = XmlReader.Create(strR, new() { IgnoreWhitespace = true });
+        using var r = System.Xml.XmlReader.Create(strR, new() { IgnoreWhitespace = true });
 
         r.MoveToContent();
         r.ReadStartElement("methodCall");

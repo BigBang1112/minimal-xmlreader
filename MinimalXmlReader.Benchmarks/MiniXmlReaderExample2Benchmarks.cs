@@ -22,10 +22,10 @@ public class MiniXmlReaderExample2Benchmarks
         xml = File.ReadAllText("Random.xml");
 
         ms = new MemoryStream(Encoding.UTF8.GetBytes(xml));
-        xmlReader = XmlReader.Create(ms, new() { IgnoreWhitespace = true });
+        xmlReader = System.Xml.XmlReader.Create(ms, new() { IgnoreWhitespace = true });
     }
 
-    [Benchmark]
+    [Benchmark(Baseline = true)]
     public void MiniXmlReader()
     {
         var r = new MiniXmlReader(xml);
@@ -66,14 +66,21 @@ public class MiniXmlReaderExample2Benchmarks
     }
 
     [Benchmark]
-    public void MicrosoftXmlReader()
+    public void XmlReader()
     {
         using var strR = new StringReader(xml);
-        using var r = XmlReader.Create(strR, new() { IgnoreWhitespace = true });
+        using var r = System.Xml.XmlReader.Create(strR, new() { IgnoreWhitespace = true });
 
         r.MoveToContent();
         r.ReadStartElement("root");
         r.ReadStartElement("person");
+        r.GetAttribute("firstname");
+        r.GetAttribute("lastname");
+        r.GetAttribute("city");
+        r.GetAttribute("country");
+        r.GetAttribute("firstname2");
+        r.GetAttribute("lastname2");
+        r.GetAttribute("email");
         r.ReadStartElement("random");
         r.ReadContentAsString();
         r.ReadEndElement();

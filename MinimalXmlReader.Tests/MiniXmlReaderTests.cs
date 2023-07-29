@@ -115,4 +115,52 @@ public class MiniXmlReaderTests
         Assert.True(r.SkipEndElement("age"));
         Assert.True(r.SkipEndElement("Anallese"));
     }
+
+    [Fact]
+    public void IntegrationTest_XmlRpcMethodResponseExtreme()
+    {
+        var xml = File.ReadAllText("XmlRpcMethodResponseExtreme.xml");
+
+        var r = new MiniXmlReader(xml);
+
+        r.SkipProcessingInstruction();
+        r.SkipStartElement("methodResponse");
+        r.SkipStartElement("params");
+        r.SkipStartElement("param");
+        r.SkipStartElement("value");
+        r.SkipStartElement("array");
+        r.SkipStartElement("data");
+
+        while (r.SkipStartElement("value"))
+        {
+            Assert.True(r.SkipStartElement("array"));
+            Assert.True(r.SkipStartElement("data"));
+            Assert.True(r.SkipStartElement("value"));
+            Assert.True(r.SkipStartElement("array"));
+            Assert.True(r.SkipStartElement("data"));
+            Assert.True(r.SkipStartElement("value"));
+            Assert.True(r.SkipStartElement("array"));
+            Assert.True(r.SkipStartElement("data"));
+
+            while (r.SkipStartElement("value"))
+            {
+                r.SkipStartElement("string");
+
+                var str = r.ReadContent().ToString();
+
+                r.SkipEndElement("string");
+                r.SkipEndElement("value");
+            }
+
+            Assert.True(r.SkipEndElement("data"));
+            Assert.True(r.SkipEndElement("array"));
+            Assert.True(r.SkipEndElement("value"));
+            Assert.True(r.SkipEndElement("data"));
+            Assert.True(r.SkipEndElement("array"));
+            Assert.True(r.SkipEndElement("value"));
+            Assert.True(r.SkipEndElement("data"));
+            Assert.True(r.SkipEndElement("array"));
+            Assert.True(r.SkipEndElement("value"));
+        }
+    }
 }

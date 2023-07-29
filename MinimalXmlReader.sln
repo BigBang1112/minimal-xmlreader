@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{7F
 	ProjectSection(SolutionItems) = preProject
 		Examples\Random.xml = Examples\Random.xml
 		Examples\XmlRpcMethodCall.xml = Examples\XmlRpcMethodCall.xml
+		Examples\XmlRpcMethodResponseExtreme.xml = Examples\XmlRpcMethodResponseExtreme.xml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Položky řešení", "Položky řešení", "{BCCFF6F1-9AE2-4142-B49D-449ED93D590F}"
