@@ -5,7 +5,7 @@
 
 Minimal XmlReader is a simple, lightweight, and fast XML reader for .NET, mainly viable for NativeAOT.
 
-Official XmlReader will use at least up to 6MB of additional self-contained executable binary size. This library tries to reduce this size, while also reducing memory usage and improving performance, in case you don't want to do any extra fancy XML reading.
+**Official XmlReader uses at least up to 6MB of additional self-contained executable binary size!** This library tries to reduce this size, while also reducing memory usage and improving performance, in case you don't want to do any extra fancy XML reading or validating.
 
 **Beware this is still considered unstable** and on larger XML files this may be still less efficient than the official XmlReader.
 
