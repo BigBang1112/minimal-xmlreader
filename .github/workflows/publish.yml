@@ -42,4 +42,4 @@ jobs:
       run: dotnet nuget push MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
     
     - name: Publish the package to github.com
-      run: dotnet nuget push MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/bigbang1112/index.json
+      run: dotnet nuget push MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg -k ${{ env.GH_TOKEN }} -s https://nuget.pkg.github.com/bigbang1112/index.json
