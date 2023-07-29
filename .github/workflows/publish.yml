@@ -28,12 +28,12 @@ jobs:
       
     - name: Test
       run: dotnet test -c Release --no-build --verbosity normal
-      
-    - name: Publish the package to nuget.org
-      run: dotnet nuget push MinimalXmlReader/bin/Release/*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
-    
-    - name: Publish the package to github.com
-      run: dotnet nuget push MinimalXmlReader/bin/Release/*.nupkg -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/bigbang1112/index.json
     
     - name: Upload the package to this release
-      run: gh release upload ${{ github.ref_name }} MinimalXmlReader/bin/Release/*.nupkg
+      run: gh release upload ${{ github.ref_name }} MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg
+      
+    - name: Publish the package to nuget.org
+      run: dotnet nuget push MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+    
+    - name: Publish the package to github.com
+      run: dotnet nuget push MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/bigbang1112/index.json
