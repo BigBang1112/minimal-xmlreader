@@ -1,7 +1,25 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<Product>MinimalXmlReader</Product>
+		<AssemblyName>MinimalXmlReader</AssemblyName>
+		<AssemblyTitle>MinimalXmlReader</AssemblyTitle>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Authors>Petr Pivoňka (BigBang1112)</Authors>
+		<Description>Simple, lightweight, and fast XML reader for .NET, mainly viable for NativeAOT.</Description>
+		<Copyright>Copyright © Petr Pivoňka</Copyright>
+		<PackageTags>xml, xmlreader, performance, reader, nativeaot</PackageTags>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>https://github.com/BigBang1112/minimal-xmlreader</RepositoryUrl>
+		<PackageProjectUrl>https://github.com/BigBang1112/minimal-xmlreader</PackageProjectUrl>
+	</PropertyGroup>
 
 	<PropertyGroup>
 		<Version>0.1.0</Version>
+		<PackageReleaseNotes></PackageReleaseNotes>
+	</PropertyGroup>
+	
+	<PropertyGroup>
 		<TargetFrameworks>net7.0;net6.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
@@ -10,4 +28,10 @@
 		<IsAotCompatible>true</IsAotCompatible>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
+		<NoWarn>1591</NoWarn>
+	</PropertyGroup>
 </Project>
