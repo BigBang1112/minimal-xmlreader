@@ -37,7 +37,7 @@ jobs:
       run: dotnet test -c Release --no-build --verbosity normal
       
     - name: Publish the package to nuget.org
-      run: dotnet nuget push MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+      run: dotnet nuget push MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json --skip-duplicate
     
     - name: Publish the package to github.com
       run: dotnet nuget push MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg -k ${{ env.GH_TOKEN }} -s https://nuget.pkg.github.com/bigbang1112/index.json
