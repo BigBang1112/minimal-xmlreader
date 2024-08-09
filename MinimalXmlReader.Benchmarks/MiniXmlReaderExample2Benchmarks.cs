@@ -1,9 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using System.Globalization;
-using System.Reflection;
-using System.Text;
-using System.Xml;
 
 namespace MinimalXmlReader.Benchmarks;
 
@@ -13,15 +10,10 @@ namespace MinimalXmlReader.Benchmarks;
 public class MiniXmlReaderExample2Benchmarks
 {
     private readonly string xml;
-    private readonly MemoryStream ms;
-    private readonly XmlReader xmlReader;
 
     public MiniXmlReaderExample2Benchmarks()
     {
         xml = File.ReadAllText("Random.xml");
-
-        ms = new MemoryStream(Encoding.UTF8.GetBytes(xml));
-        xmlReader = System.Xml.XmlReader.Create(ms, new() { IgnoreWhitespace = true });
     }
 
     [Benchmark(Baseline = true)]
@@ -31,7 +23,7 @@ public class MiniXmlReaderExample2Benchmarks
 
         r.SkipProcessingInstruction();
         r.SkipStartElement("root");
-        r.ReadStartElement("person", out var personAtts);
+        r.ReadStartElement("person", out var _);
         r.SkipStartElement("random");
         int.Parse(r.ReadContent());
         r.SkipEndElement("random");

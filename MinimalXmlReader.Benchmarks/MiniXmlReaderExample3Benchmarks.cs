@@ -11,15 +11,10 @@ namespace MinimalXmlReader.Benchmarks;
 public class MiniXmlReaderExample3Benchmarks
 {
     private readonly string xml;
-    private readonly MemoryStream ms;
-    private readonly XmlReader xmlReader;
 
     public MiniXmlReaderExample3Benchmarks()
     {
         xml = File.ReadAllText("XmlRpcMethodResponseExtreme.xml");
-
-        ms = new MemoryStream(Encoding.UTF8.GetBytes(xml));
-        xmlReader = System.Xml.XmlReader.Create(ms, new() { IgnoreWhitespace = true });
     }
 
     [Benchmark(Baseline = true)]
@@ -50,7 +45,7 @@ public class MiniXmlReaderExample3Benchmarks
             {
                 r.SkipStartElement("string");
 
-                var str = r.ReadContent().ToString();
+                _ = r.ReadContent().ToString();
 
                 r.SkipEndElement("string");
                 r.SkipEndElement("value");
@@ -100,7 +95,7 @@ public class MiniXmlReaderExample3Benchmarks
 
                 r.ReadStartElement("string");
 
-                var str = r.ReadContentAsString();
+                _ = r.ReadContentAsString();
 
                 r.ReadEndElement();
                 r.ReadEndElement();

@@ -146,7 +146,7 @@ public class MiniXmlReaderTests
             {
                 r.SkipStartElement("string");
 
-                var str = r.ReadContent().ToString();
+                _ = r.ReadContent().ToString();
 
                 r.SkipEndElement("string");
                 r.SkipEndElement("value");

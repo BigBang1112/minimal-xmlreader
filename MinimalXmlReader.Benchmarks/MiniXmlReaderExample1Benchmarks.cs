@@ -1,7 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
-using System.Text;
-using System.Xml;
 
 namespace MinimalXmlReader.Benchmarks;
 
@@ -11,15 +9,10 @@ namespace MinimalXmlReader.Benchmarks;
 public class MiniXmlReaderExample1Benchmarks
 {
     private readonly string xml;
-    private readonly MemoryStream ms;
-    private readonly XmlReader xmlReader;
 
     public MiniXmlReaderExample1Benchmarks()
     {
         xml = File.ReadAllText("XmlRpcMethodCall.xml");
-
-        ms = new MemoryStream(Encoding.UTF8.GetBytes(xml));
-        xmlReader = System.Xml.XmlReader.Create(ms, new() { IgnoreWhitespace = true });
     }
 
     [Benchmark(Baseline = true)]
