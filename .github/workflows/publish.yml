@@ -6,10 +6,11 @@ on:
 
 permissions:
   contents: write # important for release description edit and asset upload
+  packages: write
 
 jobs:
-  build:
-    name: Build
+  build-and-publish:
+    name: Build and Publish
 
     runs-on: ubuntu-latest
     
@@ -17,29 +18,47 @@ jobs:
       GH_TOKEN: ${{ github.token }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+
+    - name: Set release information
+      run: gh release edit ${{ github.ref_name }} -n "$(echo -e '***[Pre-release is being automatically created, please wait...](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})***\n\n${{ github.event.release.body }}')"
     
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
-          7.0.x
-          6.0.x
+          8.0.x
           
     - name: Restore dependencies
       run: dotnet restore
       
     - name: Build
-      run: dotnet build -c Release --no-restore
+      run: dotnet build -c Release --no-restore /p:ContinuousIntegrationBuild=true
       
     - name: Test
-      run: dotnet test -c Release --no-build --verbosity normal
+      run: dotnet test -c Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./coverage
     
-    - name: Upload the package to this release
-      run: gh release upload ${{ github.ref_name }} MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg
+    - name: Code Coverage Report
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      with:
+        filename: coverage/**/coverage.cobertura.xml
+        badge: true
+        fail_below_min: true
+        format: text
+        hide_branch_rate: false
+        hide_complexity: true
+        indicators: true
+        output: both
+        thresholds: '60 80'
       
     - name: Publish the package to nuget.org
       run: dotnet nuget push MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
     
     - name: Publish the package to github.com
       run: dotnet nuget push MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg -k ${{ secrets.GITHUB_TOKEN }} -s https://nuget.pkg.github.com/bigbang1112/index.json
+    
+    - name: Upload the package to this release
+      run: gh release upload ${{ github.ref_name }} MinimalXmlReader/bin/Release/MinimalXmlReader.*.nupkg
+
+    - name: Set release information
+      run: gh release edit ${{ github.ref_name }} -n "$(echo -e '${{ github.event.release.body }}\n\nAssets were automatically generated using the [publish workflow](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}).')"
