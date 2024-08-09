@@ -3,16 +3,27 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace MinimalXmlReader;
 
+/// <summary>
+/// A minimal XML reader.
+/// </summary>
 public ref struct MiniXmlReader
 {
     private readonly ReadOnlySpan<char> xml;
     private int position;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MiniXmlReader"/> struct.
+    /// </summary>
+    /// <param name="xml">The XML to read.</param>
     public MiniXmlReader(ReadOnlySpan<char> xml)
     {
         this.xml = xml;
     }
 
+    /// <summary>
+    /// Skips a processing instruction.
+    /// </summary>
+    /// <returns>True if a processing instruction was skipped; otherwise, false.</returns>
     public bool SkipProcessingInstruction()
     {
         _ = SkipSpaces();
@@ -35,6 +46,10 @@ public ref struct MiniXmlReader
         return true;
     }
 
+    /// <summary>
+    /// Skips a start element.
+    /// </summary>
+    /// <param name="name">The name of the element to skip.</param>
     public bool SkipStartElement(ReadOnlySpan<char> name)
     {
         _ = SkipSpaces();
@@ -57,6 +72,11 @@ public ref struct MiniXmlReader
         return true;
     }
 
+    /// <summary>
+    /// Skips a start element.
+    /// </summary>
+    /// <returns>True if a start element was skipped; otherwise, false.</returns>
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     public bool SkipStartElement()
     {
         SkipSpaces();
@@ -83,6 +103,11 @@ public ref struct MiniXmlReader
         return true;
     }
 
+    /// <summary>
+    /// Reads a start element.
+    /// </summary>
+    /// <param name="attributes">The attributes of the element.</param>
+    /// <returns>The name of the element.</returns>
     public ReadOnlySpan<char> ReadStartElement(out Dictionary<string, string> attributes)
     {
         var name = BeginReadStartElement();
@@ -92,6 +117,10 @@ public ref struct MiniXmlReader
         return name;
     }
 
+    /// <summary>
+    /// Reads a start element.
+    /// </summary>
+    /// <returns>The name of the element.</returns>
     public ReadOnlySpan<char> ReadStartElement()
     {
         var name = BeginReadStartElement();
@@ -101,6 +130,13 @@ public ref struct MiniXmlReader
         return name;
     }
 
+    /// <summary>
+    /// Reads a start element.
+    /// </summary>
+    /// <param name="name">The name of the element to read.</param>
+    /// <param name="attributes">The attributes of the element.</param>
+    /// <returns>True if a start element was read; otherwise, false.</returns>
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     public bool ReadStartElement(ReadOnlySpan<char> name, [NotNullWhen(true)] out Dictionary<string, string>? attributes)
     {
         SkipSpaces();
@@ -124,6 +160,12 @@ public ref struct MiniXmlReader
         return true;
     }
 
+    /// <summary>
+    /// Skips an end element.
+    /// </summary>
+    /// <param name="name">The name of the element to skip.</param>
+    /// <returns>True if an end element was skipped; otherwise, false.</returns>
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     public bool SkipEndElement(ReadOnlySpan<char> name)
     {
         _ = SkipSpaces();
@@ -146,6 +188,11 @@ public ref struct MiniXmlReader
         return true;
     }
 
+    /// <summary>
+    /// Skips an end element.
+    /// </summary>
+    /// <returns>True if an end element was skipped; otherwise, false.</returns>
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     public bool SkipEndElement()
     {
         _ = SkipSpaces();
@@ -185,6 +232,10 @@ public ref struct MiniXmlReader
         return true;
     }
 
+    /// <summary>
+    /// Reads content of an element.
+    /// </summary>
+    /// <returns>The content of the element.</returns>
     public ReadOnlySpan<char> ReadContent()
     {
         SkipSpaces();
@@ -196,11 +247,19 @@ public ref struct MiniXmlReader
         return xml[start..position];
     }
 
+    /// <summary>
+    /// Reads content of an element as a string.
+    /// </summary>
+    /// <returns>The content of the element as a string.</returns>
     public string ReadContentAsString()
     {
         return ReadContent().ToString();
     }
 
+    /// <summary>
+    /// Reads content of an element as a boolean.
+    /// </summary>
+    /// <returns>The content of the element as a boolean.</returns>
     public bool ReadContentAsBoolean()
     {
         var content = ReadContent();
