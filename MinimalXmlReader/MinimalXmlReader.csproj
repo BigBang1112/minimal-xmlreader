@@ -1,37 +1,38 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<Product>MinimalXmlReader</Product>
-		<AssemblyName>MinimalXmlReader</AssemblyName>
-		<AssemblyTitle>MinimalXmlReader</AssemblyTitle>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Authors>Petr Pivoňka (BigBang1112)</Authors>
-		<Description>Simple, lightweight, and fast XML reader for .NET, mainly viable for NativeAOT, and for those that don't want to waste 6MB of executable binary just to read a few XML lines.</Description>
-		<Copyright>Copyright © Petr Pivoňka</Copyright>
-		<PackageTags>xml, xmlreader, performance, reader, nativeaot</PackageTags>
-		<RepositoryType>git</RepositoryType>
-		<RepositoryUrl>https://github.com/BigBang1112/minimal-xmlreader</RepositoryUrl>
-		<PackageProjectUrl>https://github.com/BigBang1112/minimal-xmlreader</PackageProjectUrl>
-		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<Version>0.1.0</Version>
-		<PackageReleaseNotes></PackageReleaseNotes>
+        <PackageId>MinimalXmlReader</PackageId>
+        <Version>0.1.1</Version>
+        <Authors>BigBang1112</Authors>
+        <Description>Simple, lightweight, and fast XML reader for .NET, mainly viable for NativeAOT, and for those that don't want to waste 6MB of executable binary just to read a few XML lines.</Description>
+        <Copyright>Copyright (c) 2024 Petr Pivoňka</Copyright>
+        <PackageProjectUrl>https://github.com/BigBang1112/minimal-xmlreader</PackageProjectUrl>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageTags>xml, xmlreader, performance, reader, nativeaot</PackageTags>
+        <PackageReleaseNotes></PackageReleaseNotes>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	</PropertyGroup>
 	
 	<PropertyGroup>
-		<TargetFrameworks>net7.0;net6.0</TargetFrameworks>
+		<TargetFrameworks>net8.0</TargetFrameworks>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<LangVersion>11</LangVersion>
-		<IsTrimmable>true</IsTrimmable>
-		<IsAotCompatible>true</IsAotCompatible>
+		<LangVersion>12</LangVersion>
+        <IsTrimmable Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net6.0'))">true</IsTrimmable>
+        <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
+
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
 	</PropertyGroup>
 
-	<PropertyGroup>
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
-		<NoWarn>1591</NoWarn>
-	</PropertyGroup>
+    <ItemGroup>
+        <None Include="../README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
 </Project>

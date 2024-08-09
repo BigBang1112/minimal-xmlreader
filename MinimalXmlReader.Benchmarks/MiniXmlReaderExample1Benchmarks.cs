@@ -5,9 +5,8 @@ using System.Xml;
 
 namespace MinimalXmlReader.Benchmarks;
 
-[SimpleJob(RuntimeMoniker.Net60)]
-[SimpleJob(RuntimeMoniker.Net70)]
-[SimpleJob(RuntimeMoniker.NativeAot70)]
+[SimpleJob(RuntimeMoniker.Net80)]
+[SimpleJob(RuntimeMoniker.NativeAot80)]
 [MemoryDiagnoser]
 public class MiniXmlReaderExample1Benchmarks
 {
