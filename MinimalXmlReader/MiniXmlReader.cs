@@ -308,12 +308,21 @@ public ref struct MiniXmlReader
 
             Advance();
 
+            var isApostrophe = false;
+
             if (!SkipChar('"'))
             {
-                throw new Exception("Expected \"");
+                if (SkipChar('\''))
+                {
+                    isApostrophe = true;
+                }
+                else
+                {
+                    throw new Exception("Expected \" or '");
+                }
             }
 
-            var attValue = ReadUntilChar('"', includeSpaces: true);
+            var attValue = ReadUntilChar(isApostrophe ? '\'' : '"', includeSpaces: true);
 
             Advance();
 
@@ -407,12 +416,21 @@ public ref struct MiniXmlReader
 
             Advance();
 
+            var isApostrophe = false;
+
             if (!SkipChar('"'))
             {
-                throw new Exception("Expected \"");
+                if (SkipChar('\''))
+                {
+                    isApostrophe = true;
+                }
+                else
+                {
+                    throw new Exception("Expected \" or '");
+                }
             }
 
-            SkipUntilChar('"', includeSpaces: true);
+            SkipUntilChar(isApostrophe ? '\'' : '"', includeSpaces: true);
 
             Advance();
 
