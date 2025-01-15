@@ -197,8 +197,11 @@ public ref struct MiniXmlReader
     {
         _ = SkipSpaces();
 
+        var safePosition = position;
+
         if (!SkipChar('<') || !SkipChar('/'))
         {
+            position = safePosition;
             return false;
         }
 
