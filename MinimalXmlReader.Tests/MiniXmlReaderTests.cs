@@ -70,7 +70,7 @@ public class MiniXmlReaderTests
 
         Assert.False(r.SkipProcessingInstruction());
         Assert.True(r.SkipStartElement("root"));
-        Assert.True(r.ReadStartElement("person", out var personAtts));
+        Assert.True(r.TryReadStartElement("person", out var personAtts));
         Assert.Equal(expected: "Tierney", actual: personAtts["firstname"]);
         Assert.Equal(expected: "Shirberg", actual: personAtts["lastname"]);
         Assert.Equal(expected: "Port-au-Prince", actual: personAtts["city"]);

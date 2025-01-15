@@ -23,7 +23,7 @@ public class MiniXmlReaderExample2Benchmarks
 
         r.SkipProcessingInstruction();
         r.SkipStartElement("root");
-        r.ReadStartElement("person", out var _);
+        r.TryReadStartElement("person");
         r.SkipStartElement("random");
         int.Parse(r.ReadContent());
         r.SkipEndElement("random");
