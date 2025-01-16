@@ -24,6 +24,7 @@ public ref struct MiniXmlReader
     /// Skips a processing instruction.
     /// </summary>
     /// <returns>True if a processing instruction was skipped; otherwise, false.</returns>
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     public bool SkipProcessingInstruction()
     {
         _ = SkipSpaces();
@@ -50,6 +51,7 @@ public ref struct MiniXmlReader
     /// Skips a start element.
     /// </summary>
     /// <param name="name">The name of the element to skip.</param>
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     public bool SkipStartElement(ReadOnlySpan<char> name)
     {
         _ = SkipSpaces();
@@ -108,9 +110,13 @@ public ref struct MiniXmlReader
     /// </summary>
     /// <param name="attributes">The attributes of the element.</param>
     /// <returns>The name of the element.</returns>
+    /// <exception cref="Exception">Not a start element or something unexpected has failed.</exception>
     public ReadOnlySpan<char> ReadStartElement(out Dictionary<string, string> attributes)
     {
-        var name = BeginReadStartElement();
+        if (!TryBeginReadStartElement(out var name))
+        {
+            throw new Exception("Not a start element");
+        }
 
         attributes = ReadAttributes();
 
@@ -121,9 +127,13 @@ public ref struct MiniXmlReader
     /// Reads a start element.
     /// </summary>
     /// <returns>The name of the element.</returns>
+    /// <exception cref="Exception">Not a start element or something unexpected has failed.</exception>
     public ReadOnlySpan<char> ReadStartElement()
     {
-        var name = BeginReadStartElement();
+        if (!TryBeginReadStartElement(out var name))
+        {
+            throw new Exception("Not a start element");
+        }
 
         SkipAttributes();
 
@@ -131,24 +141,19 @@ public ref struct MiniXmlReader
     }
 
     /// <summary>
-    /// Reads a start element.
+    /// Tries reading a start element.
     /// </summary>
-    /// <param name="name">The name of the element to read.</param>
+    /// <param name="name">The name of the element to match.</param>
     /// <param name="attributes">The attributes of the element.</param>
     /// <returns>True if a start element was read; otherwise, false.</returns>
     /// <exception cref="Exception">Something unexpected has failed.</exception>
-    public bool ReadStartElement(ReadOnlySpan<char> name, [NotNullWhen(true)] out Dictionary<string, string>? attributes)
+    public bool TryReadStartElement(ReadOnlySpan<char> name, [NotNullWhen(true)] out Dictionary<string, string>? attributes)
     {
         SkipSpaces();
 
         var safePosition = position;
 
-        if (!SkipChar('<'))
-        {
-            throw new Exception("Not a start element");
-        }
-
-        if (!ValidateElementName(name))
+        if (!SkipChar('<') || !ValidateElementName(name))
         {
             position = safePosition;
             attributes = null;
@@ -156,6 +161,77 @@ public ref struct MiniXmlReader
         }
 
         attributes = ReadAttributes();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Tries reading a start element.
+    /// </summary>
+    /// <param name="name">The name of the element to match.</param>
+    /// <returns>True if a start element was read; otherwise, false.</returns>
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
+    public bool TryReadStartElement(ReadOnlySpan<char> name)
+    {
+        SkipSpaces();
+
+        var safePosition = position;
+
+        if (!SkipChar('<') || !ValidateElementName(name))
+        {
+            position = safePosition;
+            return false;
+        }
+
+        SkipAttributes();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Tries reading a start element.
+    /// </summary>
+    /// <param name="name">The returned name of the element.</param>
+    /// <param name="attributes">The attributes of the element.</param>
+    /// <returns>True if a start element was read; otherwise, false.</returns>
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
+    public bool TryReadStartElement(out ReadOnlySpan<char> name, [NotNullWhen(true)] out Dictionary<string, string>? attributes)
+    {
+        SkipSpaces();
+
+        var safePosition = position;
+
+        if (!TryBeginReadStartElement(out name))
+        {
+            attributes = null;
+            position = safePosition;
+            return false;
+        }
+
+        attributes = ReadAttributes();
+
+        return true;
+    }
+
+    /// <summary>
+    /// Tries reading a start element.
+    /// </summary>
+    /// <param name="name">The returned name of the element.</param>
+    /// <returns>True if a start element was read; otherwise, false.</returns>
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
+    public bool TryReadStartElement(out ReadOnlySpan<char> name)
+    {
+        SkipSpaces();
+
+        var safePosition = position;
+
+        if (!TryBeginReadStartElement(out name))
+        {
+            position = safePosition;
+            return false;
+        }
+
+        SkipAttributes();
 
         return true;
     }
@@ -197,8 +273,11 @@ public ref struct MiniXmlReader
     {
         _ = SkipSpaces();
 
+        var safePosition = position;
+
         if (!SkipChar('<') || !SkipChar('/'))
         {
+            position = safePosition;
             return false;
         }
 
@@ -236,6 +315,7 @@ public ref struct MiniXmlReader
     /// Reads content of an element.
     /// </summary>
     /// <returns>The content of the element.</returns>
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     public ReadOnlySpan<char> ReadContent()
     {
         SkipSpaces();
@@ -251,6 +331,7 @@ public ref struct MiniXmlReader
     /// Reads content of an element as a string.
     /// </summary>
     /// <returns>The content of the element as a string.</returns>
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     public string ReadContentAsString()
     {
         return ReadContent().ToString();
@@ -260,6 +341,7 @@ public ref struct MiniXmlReader
     /// Reads content of an element as a boolean.
     /// </summary>
     /// <returns>The content of the element as a boolean.</returns>
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     public bool ReadContentAsBoolean()
     {
         var content = ReadContent();
@@ -272,6 +354,7 @@ public ref struct MiniXmlReader
         };
     }
 
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     private bool ValidateElementName(ReadOnlySpan<char> name)
     {
         for (var i = 0; i < name.Length; i++)
@@ -296,6 +379,7 @@ public ref struct MiniXmlReader
         return true;
     }
 
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     private Dictionary<string, string> ReadAttributes(bool expectsProcessingInstruction = false)
     {
         SkipSpaces();
@@ -334,13 +418,15 @@ public ref struct MiniXmlReader
         return attributes;
     }
 
-    private ReadOnlySpan<char> BeginReadStartElement()
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
+    private bool TryBeginReadStartElement(out ReadOnlySpan<char> name)
     {
         SkipSpaces();
 
         if (!SkipChar('<'))
         {
-            throw new Exception("Not a start element");
+            name = default;
+            return false;
         }
 
         var start = position;
@@ -357,10 +443,10 @@ public ref struct MiniXmlReader
             Advance();
         }
 
-        var name = xml[start..position];
+        name = xml[start..position];
 
         Debug.WriteLine($"BeginReadStartElement({name})");
-        return name;
+        return true;
     }
 
     private bool SkipChar(char c)
@@ -376,6 +462,7 @@ public ref struct MiniXmlReader
         return true;
     }
 
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     private void SkipUntilChar(char c, bool includeSpaces = false)
     {
         do
@@ -406,6 +493,7 @@ public ref struct MiniXmlReader
         return skipped;
     }
 
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     private void SkipAttributes(bool expectsProcessingInstruction = false)
     {
         SkipSpaces();
@@ -438,6 +526,7 @@ public ref struct MiniXmlReader
         }
     }
 
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     private ReadOnlySpan<char> ReadUntilChar(char expectedChar, bool includeSpaces = false)
     {
         var start = position;
@@ -462,6 +551,7 @@ public ref struct MiniXmlReader
         return xml[start..position];
     }
 
+    /// <exception cref="Exception">Something unexpected has failed.</exception>
     private void Advance()
     {
         if (position == xml.Length - 1)
