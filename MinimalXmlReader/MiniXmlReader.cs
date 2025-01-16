@@ -429,6 +429,12 @@ public ref struct MiniXmlReader
             return false;
         }
 
+        if (xml[position] == '/')
+        {
+            name = default;
+            return false;
+        }
+
         var start = position;
 
         while (true)
