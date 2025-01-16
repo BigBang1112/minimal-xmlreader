@@ -354,6 +354,9 @@ public ref struct MiniXmlReader
         };
     }
 
+    /// <summary>
+    /// Consumer of this method should handle safe position.
+    /// </summary>
     /// <exception cref="Exception">Something unexpected has failed.</exception>
     private bool ValidateElementName(ReadOnlySpan<char> name)
     {
@@ -418,6 +421,9 @@ public ref struct MiniXmlReader
         return attributes;
     }
 
+    /// <summary>
+    /// Consumer of this method should handle safe position.
+    /// </summary>
     /// <exception cref="Exception">Something unexpected has failed.</exception>
     private bool TryBeginReadStartElement(out ReadOnlySpan<char> name)
     {
