@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
         <PackageId>MinimalXmlReader</PackageId>
-        <Version>0.2.0</Version>
+        <Version>0.2.1</Version>
         <Authors>BigBang1112</Authors>
         <Description>Simple, lightweight, and fast XML reader for .NET, mainly viable for NativeAOT, and for those that don't want to waste 6MB of executable binary just to read a few XML lines.</Description>
         <Copyright>Copyright (c) 2024 Petr Pivoňka</Copyright>
