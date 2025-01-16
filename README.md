@@ -2,7 +2,7 @@
 
 [![Nuget](https://img.shields.io/nuget/v/MinimalXmlReader?style=for-the-badge)](https://www.nuget.org/packages/MinimalXmlReader/)
 [![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/BigBang1112/minimal-xmlreader?include_prereleases&style=for-the-badge)](https://github.com/BigBang1112/minimal-xmlreader/releases)
-[![Code Coverage](https://img.shields.io/badge/Code%20Coverage-72%25-yellow?style=for-the-badge)](https://github.com/BigBang1112/minimal-xmlreader)
+[![Code Coverage](https://img.shields.io/badge/Code%20Coverage-61%25-yellow?style=for-the-badge)](https://github.com/BigBang1112/minimal-xmlreader)
 
 Minimal XmlReader is a simple, lightweight, and fast XML reader for .NET, mainly viable for NativeAOT.
 
