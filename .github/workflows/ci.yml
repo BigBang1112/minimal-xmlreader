@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, dev ]
+  workflow_dispatch:
+
+jobs:
+  ci:
+    name: Continuous Integration
+    uses: bigbang1112/workflows/.github/workflows/ci.yml@main
+    with:
+      dotnet-version: |
+        10.x.x
+        9.x.x
+        8.x.x

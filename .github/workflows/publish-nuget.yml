@@ -1,0 +1,23 @@
+name: Publish NuGet
+
+on:
+  release:
+    types: [ published ]
+  workflow_dispatch:
+
+permissions:
+  contents: write # important for release description edit and asset upload
+  packages: write
+
+jobs:
+  publish:
+    name: Publish NuGet
+    uses: bigbang1112/workflows/.github/workflows/publish-nuget.yml@main
+    with:
+      dotnet-version: |
+        10.x.x
+        9.x.x
+        8.x.x
+      project-path: MinimalXmlReader
+    secrets:
+      NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
